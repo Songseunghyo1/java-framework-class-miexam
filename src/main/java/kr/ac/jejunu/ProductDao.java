@@ -5,7 +5,7 @@ import java.sql.*;
 public class ProductDao {
     private ConnectionMaker connectionMaker;
 
-    public ProductDao() {
+    public ProductDao(ConnectionMaker connectionMaker) {
         this.connectionMaker = new JejuConnectionMaker();
     }
 
