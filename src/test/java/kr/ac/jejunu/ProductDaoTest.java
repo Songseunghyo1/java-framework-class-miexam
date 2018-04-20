@@ -11,11 +11,10 @@ import static org.junit.Assert.assertThat;
 
 public class ProductDaoTest {
     private ProductDao productDao;
-    private ProductDao hallaProductDao;
+
     @Before
     public void setup() {
-        productDao = new JejuProductDao();
-        hallaProductDao = new HallaProductDao();
+        productDao = new ProductDao();
     }
 
     @Test
