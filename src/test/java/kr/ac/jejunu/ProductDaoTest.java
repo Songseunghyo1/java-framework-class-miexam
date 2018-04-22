@@ -32,7 +32,6 @@ public class ProductDaoTest {
         productDao.update(product);
 
         Product updateProduct = productDao.get(id);
-
         assertEquals(updateProduct.getId(), id);
         assertEquals(updateProduct.getTitle(), product.getTitle());
         assertEquals(updateProduct.getPrice(), product.getPrice());
