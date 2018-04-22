@@ -7,13 +7,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class JejuConnectionMaker implements ConnectionMaker {
-    @Value("{db.classname}")
+    @Value("${db.classname}")
     String className = "com.mysql.jdbc.Driver";
-    @Value("{db.url}")
+    @Value("${db.url}")
     String url = "jdbc:mysql://localhost/portalservice?characterEncoding=utf-8";
-    @Value("{db.username}")
+    @Value("${db.username}")
     String username = "root";
-    @Value("{db.password}")
+    @Value("${db.password}")
     String password = "sslabflask";
 
     @Override

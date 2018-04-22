@@ -7,7 +7,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import java.sql.SQLException;
 
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class ProductDaoTest {
     private ProductDao productDao;
@@ -17,6 +19,41 @@ public class ProductDaoTest {
     public void setup() {
         ApplicationContext applicationContext = new AnnotationConfigApplicationContext(DaoFactory.class);
         productDao = applicationContext.getBean("productDao", ProductDao.class);
+    }
+
+    @Test
+    public void update() throws SQLException, ClassNotFoundException {
+        Product product = new Product();
+        Long id = insertProductTest(product);
+
+        product.setId(id);
+        product.setTitle("제주감귤");
+        product.setPrice(15000);
+        productDao.update(product);
+
+        Product updateProduct = productDao.get(id);
+
+        assertEquals(updateProduct.getId(), id);
+        assertEquals(updateProduct.getTitle(), product.getTitle());
+        assertEquals(updateProduct.getPrice(), product.getPrice());
+    }
+
+    private Long insertProductTest(Product product) throws SQLException, ClassNotFoundException {
+        product.setTitle("제주감귤");
+        product.setPrice(15000);
+
+        return productDao.insert(product);
+    }
+
+    @Test
+    public void delete() throws SQLException, ClassNotFoundException {
+        Product product = new Product();
+        Long id = insertProductTest(product);
+
+        productDao.delete(id);
+
+        Product deleteProduct = productDao.get(id);
+        assertThat(deleteProduct, nullValue());
     }
 
     @Test
@@ -34,9 +71,7 @@ public class ProductDaoTest {
     @Test
     public void add() throws ClassNotFoundException, SQLException {
         Product product = new Product();
-        product.setTitle("제주감귤");
-        product.setPrice(15000);
-        Long id = productDao.insert(product);
+        Long id = insertProductTest(product);
 
         Product insertProduct = productDao.get(id);
         assertEquals(insertProduct.getId(), id);
