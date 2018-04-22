@@ -1,7 +1,10 @@
 package kr.ac.jejunu;
 
 import javax.sql.DataSource;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class ProductDao {
     private final DataSource dataSource;
@@ -11,84 +14,45 @@ public class ProductDao {
     }
 
     public Product get(Long id) throws ClassNotFoundException, SQLException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        Product product = null;
+        Connection connection = dataSource.getConnection();
 
-        try {
-            connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement("select * from product where id = ?");
-            preparedStatement.setLong(1, id);
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                product = new Product();
-                product.setId(resultSet.getLong("id"));
-                product.setTitle(resultSet.getString("title"));
-                product.setPrice(resultSet.getInt("price"));
-            }
-        } finally {
-            if (resultSet != null)
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            if (preparedStatement != null)
-                try {
-                    preparedStatement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            if (connection != null)
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-        }
+        PreparedStatement preparedStatement = connection.prepareStatement(
+                "SELECT * FROM product WHERE id = ?");
+        preparedStatement.setLong(1, id);
+
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+
+        Product product = new Product();
+        product.setId(resultSet.getLong("id"));
+        product.setTitle(resultSet.getString("title"));
+        product.setPrice(resultSet.getInt("price"));
+
+        // 자원해지
+        resultSet.close();
+        preparedStatement.close();
+        connection.close();
+
         return product;
     }
 
-    public Long insert(Product product) throws SQLException, ClassNotFoundException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
+    public Long insert(Product product) throws ClassNotFoundException, SQLException {
+        Connection connection = dataSource.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(
+                "insert into product (title, price) values (?, ?);");
+        preparedStatement.setString(1, product.getTitle());
+        preparedStatement.setInt(2, product.getPrice());
+        preparedStatement.executeUpdate();
 
-        Long id;
+        preparedStatement = connection.prepareStatement("SELECT last_insert_id()");
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
 
-        try {
-            connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement(
-                    "insert into product (title, price) values (?, ?);");
-            preparedStatement.setString(1, product.getTitle());
-            preparedStatement.setInt(2, product.getPrice());
-            preparedStatement.executeUpdate();
+        Long id = resultSet.getLong(1);
 
-            preparedStatement = connection.prepareStatement("SELECT last_insert_id()");
-            resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            id = resultSet.getLong(1);
-        } finally {
-            if (resultSet != null)
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            if (preparedStatement != null)
-                try {
-                    preparedStatement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            if (connection != null)
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-        }
+        resultSet.close();
+        preparedStatement.close();
+        connection.close();
 
         return id;
     }
