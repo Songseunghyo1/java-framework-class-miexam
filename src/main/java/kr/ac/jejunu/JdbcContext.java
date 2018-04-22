@@ -1,51 +1,31 @@
 package kr.ac.jejunu;
 
+import lombok.AllArgsConstructor;
+import lombok.Cleanup;
+
 import javax.sql.DataSource;
 import java.sql.*;
 
+@AllArgsConstructor
 public class JdbcContext {
     final DataSource dataSource;
 
-    public JdbcContext(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
 
     Product jdbcContextForGet(StatementStrategy statementStrategy) throws SQLException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
         Product product = null;
 
-        try {
-            connection = dataSource.getConnection();
-            preparedStatement = statementStrategy.makeStatement(connection);
-            resultSet = preparedStatement.executeQuery();
+        @Cleanup
+        Connection connection = dataSource.getConnection();
+        @Cleanup
+        PreparedStatement preparedStatement = statementStrategy.makeStatement(connection);
+        @Cleanup
+        ResultSet resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) {
-                product = new Product();
-                product.setId(resultSet.getLong("id"));
-                product.setTitle(resultSet.getString("title"));
-                product.setPrice(resultSet.getInt("price"));
-            }
-        } finally {
-            if (resultSet != null)
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            if (preparedStatement != null)
-                try {
-                    preparedStatement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            if (connection != null)
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+        if (resultSet.next()) {
+            product = new Product();
+            product.setId(resultSet.getLong("id"));
+            product.setTitle(resultSet.getString("title"));
+            product.setPrice(resultSet.getInt("price"));
         }
         return product;
     }
